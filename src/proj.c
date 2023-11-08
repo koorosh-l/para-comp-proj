@@ -11,6 +11,7 @@ int zerout(matrix * m, uint64_t i, uint64_t j, void *f){
   return 1;
 }
 
+
 int main(){
   matrix *m1, *m2;  
   srand(time(NULL));
