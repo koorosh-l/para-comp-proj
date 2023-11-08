@@ -8,11 +8,20 @@ struct matrix{
   void* mat;
 };
 typedef struct matrix matrix;
+//macros
 #define MATSIZE(matrix_t) ((matrix_t->row_c * matrix_t->column_c))
 #define MATBYTES(matrix_t) ((size_t)(matrix_t->row_c * matrix_t->column_c * matrix_t->memb))
 #define MATREF(matrix_t, i, j) ((matrix_t->mat+(i * j * matrix_t->memb)))
+#define deb                                                                    \
+  {                                                                            \
+    puts("----------------");                                                  \
+    printf("%s %d \n", __FILE__, __LINE__);                                    \
+    puts("----------------");                                                  \
+  }
 
-matrix* create_matrix(uint64_t row_c, uint64_t column_c, size_t memb);
-int matrix_map (matrix* mat, int(func)(matrix* status , uint64_t, uint64_t, void* field));
+//funcs
+matrix *create_matrix(uint64_t row_c, uint64_t column_c, size_t memb);
+matrix* matrix_copy(matrix * m);
+int matrix_map (matrix* mat, void* args, int(func)(matrix* status , uint64_t, uint64_t, void* args, void* field));
 int matrxi_fill(matrix* mat, void*);
 
