@@ -1,0 +1,19 @@
+* Introduction
+This repository contains the first phase of our project for parallel computing project.
+The goal is to create two randomly sized matrices field with random elements called M1 and M2, and compute a third matrix called M3 with dimensions equal to m1 using the following formula:
+\begin{M3}
+M_{3}[i][j] = {\sum_{x = 0}^{M_2.j}} {\sum_{y}^{M_2.i}} M_2[x][y] \times M_1[i+x][j+y]
+\end{M3}
+* Running
+#+begin_src shell
+  make
+#+end_src
+Running make automatically compiles and run the binary phase1, there is also a library called libmatrix that is dynamically linked using rpath linker argument.
+the dimensions of the generated matrices can be controlled with the macros RLIMIT, FI, FJ, SI, FJ, in proj.c.
+* Further development
+*Needs further testing might be some tiny problems with different sizes of matrices*.
+1. Unfolding all nested loops into one single loop(see matrix_map in libmatrix.c).
+   1.1 matrix_map can be written with an extra knill argument which is used to accumulate the return values func.
+2. some_opration() can be rewritten using just the matrix_map function w/o extra loops.
+3. finding a way to cleverly remove the need for checking boundaries in matorator() this might help achieving better cache hits and faster loops, the solution that comes to mind right now is, implementing the same functionality using % and reserving one or two fields in matrix->mat for storing the knill value. 
+
