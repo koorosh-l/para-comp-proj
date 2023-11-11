@@ -11,4 +11,4 @@ libmatrix.so: libmatrix.o
 libmatrix.o: src/matrix.c src/matrix.h
 	gcc -Wall -fPIC -c src/matrix.c -o libmatrix.o
 clean:
-	rm libmatrix.o libmatrix.so phase1.o phase1 
+	rm libmatrix.o libmatrix.so phase1.o phase1
