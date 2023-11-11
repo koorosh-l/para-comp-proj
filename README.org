@@ -1,9 +1,9 @@
 * Introduction
 This repository contains the first phase of our project for parallel computing project.
 The goal is to create two randomly sized matrices field with random elements called M1 and M2, and compute a third matrix called M3 with dimensions equal to m1 using the following formula:
-\begin{M3}
-M_{3}[i][j] = {\sum_{x = 0}^{M_2.j}} {\sum_{y}^{M_2.i}} M_2[x][y] \times M_1[i+x][j+y]
-\end{M3}
+
+M_{3}[i][j] = \sum_{x = 0}^{M_2.j} \sum_{y}^{M_2.i} M_2[x][y] \times M_1[i+x][j+y]
+
 * Running
 #+begin_src shell
   make
