@@ -1,87 +1,68 @@
 #include "matrix.h"
 #include <time.h>
-#define RLIMIT 3
-#define FI 3
-#define FJ 3
-#define SI 2
-#define SJ 2
+#define RLIMIT 2
+#define FI 100
+#define FJ 100
+#define SI 100
+#define SJ 100
 
 
 matrix *some_opration(matrix *m1, matrix *m2);
-int printer(matrix *status, uint64_t i, uint64_t j,  void *field, void* args);
-int intmatrix_printer(matrix *m1);
-int matrand(matrix *status, uint64_t i, uint64_t j, void* field, void *args);
-/* matrix* mult_overlap(matrix *m1, matrix *m2){ */
-
-/*   return m1; */
-/* } */
+void printer(matrix *, uint64_t i, uint64_t j, void*);
+void matrand(matrix *, uint64_t i, uint64_t j, void *);
 
 int main(){
-  matrix *m1, *m2;
+  matrix *m1;
+  matrix *m2;
   srand(time(NULL));
   m1 = create_matrix(FI, FJ, sizeof(int));
-  matrix_map(m1,NULL, matrand);
-  intmatrix_printer(m1);
-  /* printf("%p\n", m1->mat); */
-  /* for(int i = 0; i < m1->row_c; i++){ */
-  /*   for(int j = 0; j < m1->column_c; j++){ */
-  /*     //printf("%p ", MATREF_P(m1, i, j)); */
-  /*     printf("%p: %d ",  MATREF_P(m1, i, j),  *(int*)MATREF_P(m1, i, j)); */
-  /*   } */
-  /*   puts(""); */
-  /* } */
-  /* return 0;   */
-  deb; 
   m2 = create_matrix(SI, SJ, sizeof(int));
-  matrix_map(m2, NULL, matrand);
-  intmatrix_printer(m2);
-  some_opration(m1, m2);
+
+  matrix_map(m1, NULL, matrand);
+  matrix_map(m1, NULL, printer);
   deb;
-  intmatrix_printer(m1);
+  matrix_map(m2, NULL, matrand);
+  matrix_map(m2, NULL, printer);
+  deb;
+  some_opration(m1, m2);
+  matrix_map(m1, NULL, printer);
   return 0;
 }
 
-int printer(matrix *status, uint64_t i, uint64_t j,  void *field, void* args){
-  int ret = printf("%2d ", *(int*)field);
-  if(j == status->column_c - 1) puts("");
-  return ret;
+void printer(matrix *m, uint64_t i, uint64_t j, void* args){
+  int* field = matref(m, i, j);
+  printf("%5d ", *(int*)field);
+  if(j == m->column_c - 1) puts("");
 }
-int intmatrix_printer(matrix* m1){
-  int status = 0;
-  status = matrix_map(m1, NULL,printer);
-  return status;
-}
-
-int matrand(matrix *mat, uint64_t i, uint64_t j, void *field, void *args) {
-  void* tmp = MATREF_P(mat, i, j);
-  int rnd = rand() % RLIMIT;
-  *(int*) field = rnd;
-  return  0;
+void matrand(matrix *mat, uint64_t i, uint64_t j, void *args) {
+  int * f = matref(mat, i, j);
+  *f = rand() % RLIMIT;
 }
 
-int inner_matorator(matrix* m, uint64_t i, uint64_t j, void* field, void* args){
-  *(int*) args += (* (int*) field) * (* (int*) MATREF_P(m, i, j));
-  return 1;
+void inerator(matrix* m2, uint64_t i2, uint64_t j2, void * status){
+   uint64_t i1, j1, *res; 
+  matrix* m1;
+  m1 = (matrix *)((void **)status)[0];
+  i1 = *(uint64_t *)(((void **)status)[1]);
+  j1 = *(uint64_t *)(((void **)status)[2]);
+  res = (uint64_t *)(((void **)status)[3]);
+  /* printf("%" PRIu64" %" PRIu64"\n", i1, j1);   */
+  if(i1 + i2 >= m1->row_c || j1 + j2 >= m1->column_c) return;
+  *res = *res + (*(int *)matref(m1, i1 + i2, j1 + j2)) * (*(int *)matref(m2, i2, j2));
+  
 }
-
-int matorator(matrix* m, uint64_t i, uint64_t j, void *field, void *args){
-  matrix *m2 = (matrix *)args;
+void rator(matrix* m1, uint64_t i1, uint64_t j1,void* m2){
   uint64_t res = 0;
-  //int* i, int* j, m2*, int* res
-  //void* state [4];
-  //matrix_map(m2, &state, inner_matorator);
-  for (int x = 0; x < m2->row_c; x++) {
-    if(x + i >= m->row_c) continue;
-    for (int y = 0; y < m2->row_c; y++) {
-      if(y + j >= m->column_c) continue;//{puts("JUMPED"); continue;}
-      res += (*(int *)(MATREF_P(m, i+x, j+y))) * (*(int *)(MATREF_P(m2, x, y)));
-      //printf("did: %"PRIu64 " = m1: %"PRIu64 " + %"PRIu64 " * m2: %"PRIu64 " + %"PRIu64"\n" , res, i+x, j+y, i, j);
-    }
-  }
-    *(int *) field = res;  
-  return 1;  
+  void *status[4];
+  status [0] = m1;
+  status [1] = &i1;
+  status [2] = &j1;
+  status [3] = &res;
+  matrix_map(m2, status, inerator);
+  *(int*)(matref(m1, i1, j1)) = res;
 }
-matrix *some_opration(matrix *m1, matrix *m2) {
-  matrix_map(m1, (void *)m2, matorator);
-  return m1;
+matrix *some_opration(matrix *m1, matrix *m2){
+  matrix *ret = matrix_copy(m1);
+  matrix_map(m1, m2, rator);
+  return NULL;
 }
