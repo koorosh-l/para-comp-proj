@@ -5,11 +5,15 @@ The goal is to create two randomly sized matrices field with random elements cal
 M_{3}[i][j] = \sum_{x = 0}^{M_2.j} \sum_{y}^{M_2.i} M_2[x][y] \times M_1[i+x][j+y]
 
 * Running
+compile with
 #+begin_src shell
   make
 #+end_src
-Running make automatically compiles and run the binary phase1, there is also a library called libmatrix that is dynamically linked using rpath linker argument.
-the dimensions of the generated matrices can be controlled with the macros RLIMIT, FI, FJ, SI, FJ, in proj.c.
+This outputs two files phase1 and phase2.
+1. ./phase(1|2)
+2. ./phase(1|2) iM1 jM1
+3. ./phase(1|2) iM1 jM1 iM2 jM2 upperlimit
+4. 
 * Further development
 *Needs further testing might be some tiny problems with different sizes of matrices*.
 1. Unfolding all nested loops into one single loop(see matrix_map in libmatrix.c).

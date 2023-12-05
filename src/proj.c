@@ -1,8 +1,9 @@
 #include "matrix.h"
 #include <time.h>
-#define RLIMIT 2
-#define FI 100
-#define FJ 100
+#include <string.h>
+#define RLIMIT 1
+#define FI 1000
+#define FJ 1000
 #define SI 100
 #define SJ 100
 
@@ -11,13 +12,17 @@ matrix *some_opration(matrix *m1, matrix *m2);
 void printer(matrix *, uint64_t i, uint64_t j, void*);
 void matrand(matrix *, uint64_t i, uint64_t j, void *);
 
-int main(){
+int main(int argc, char **argv){
   matrix *m1;
   matrix *m2;
-  srand(time(NULL));
+  uint64_t iM1, jM1, iM2, jM2, uppper_limit;
+  if(argc == 5){
+    
+  }
+  srand(10);
   m1 = create_matrix(FI, FJ, sizeof(int));
   m2 = create_matrix(SI, SJ, sizeof(int));
-
+  
   matrix_map(m1, NULL, matrand);
   matrix_map(m1, NULL, printer);
   deb;
@@ -62,7 +67,10 @@ void rator(matrix* m1, uint64_t i1, uint64_t j1,void* m2){
   *(int*)(matref(m1, i1, j1)) = res;
 }
 matrix *some_opration(matrix *m1, matrix *m2){
-  matrix *ret = matrix_copy(m1);
+#ifdef NPROC
+  para_matrix_map(NPROC,m1, m2, rator);
+#else
   matrix_map(m1, m2, rator);
+#endif
   return NULL;
 }
