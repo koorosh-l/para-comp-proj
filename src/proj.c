@@ -15,10 +15,7 @@ void matrand(matrix *, uint64_t i, uint64_t j, void *);
 int main(int argc, char **argv){
   matrix *m1;
   matrix *m2;
-  uint64_t iM1, jM1, iM2, jM2, uppper_limit;
-  if(argc == 5){
-    
-  }
+  matrix *m3;
   srand(10);
   m1 = create_matrix(FI, FJ, sizeof(int));
   m2 = create_matrix(SI, SJ, sizeof(int));
@@ -29,7 +26,11 @@ int main(int argc, char **argv){
   matrix_map(m2, NULL, matrand);
   matrix_map(m2, NULL, printer);
   deb;
+#ifdef UGLY
+  m3 = some_ugly_op(m1, m2);
+#else 
   some_opration(m1, m2);
+#endif
   matrix_map(m1, NULL, printer);
   return 0;
 }
