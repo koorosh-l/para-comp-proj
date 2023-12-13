@@ -33,11 +33,12 @@ static inline void* partial_map(interval* args){
   for(uint64_t i = ((interval*)args)->start; i < ((interval*)args)->end; i++){
     args->func(args->m, i/args->m->column_c, i%args->m->column_c, args->pass);
   }
+  
   pthread_exit(NULL);
   return NULL;
 }
 
-void para_matrix_map(uint8_t nproc, matrix *m, void *arg,
+void para_matrix_map(uint32_t nproc, matrix *m, void *arg,
                       void (*func)(matrix *, uint64_t, uint64_t, void *))
 {
   uint64_t step = MATSIZE(m)/nproc;

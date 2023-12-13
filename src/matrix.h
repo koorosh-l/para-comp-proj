@@ -19,10 +19,10 @@ typedef struct matrix matrix;
 
 matrix *create_matrix(uint64_t row_c, uint64_t column_c, size_t memb);
 matrix *matrix_copy(matrix *m);
-void* matref(matrix* , int, int);
-void matrix_map(matrix *, void *,
-                void (*func)(matrix *status, uint64_t, uint64_t, void *));
-void para_matrix_map(uint8_t , matrix *, void *,
-		     void (*func)(matrix *, uint64_t, uint64_t, void *));
+void* matref(matrix* m, int i, int j);
+void matrix_map(matrix *m, void *args,
+                void (*func)(matrix *status, uint64_t i, uint64_t j, void * args));
+void para_matrix_map(uint32_t nproc , matrix * m, void * args,
+		     void (*func)(matrix *m, uint64_t i, uint64_t j, void * args));
 
 
