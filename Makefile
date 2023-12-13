@@ -1,8 +1,11 @@
-COMP_FLAGS := -O2 -lpthread -march=native -mfpmath=sse -mmmx -msse -msse2 
+COMP_FLAGS := -O2 -lpthread -march=native
 NPROC      := $(shell nproc)
 
-all: phase2 phase1
-
+all: phase2 phase1 ugly
+ugly: ugly.o
+	gcc -o ugly -L./ -lmatrix -Wl,-rpath=./ ugly.o $(COMP_FLAGS)
+ugly.o: src/proj.c libmatrix.so
+	gcc -c src/proj.c -o ugly.o $(COMP_FLAGS) -DNUGLY
 phase2: phase2.o
 	gcc -o phase2 -L./ -lmatrix -Wl,-rpath=./ phase2.o $(COMP_FLAGS)
 phase2.o: src/proj.c libmatrix.so
@@ -16,4 +19,4 @@ libmatrix.so: libmatrix.o
 libmatrix.o: src/matrix.c src/matrix.h
 	gcc -Wall -fPIC -c src/matrix.c -o libmatrix.o $(COMP_FLAGS)
 clean:
-	rm libmatrix.o libmatrix.so phase1.o phase1 phase2.o phase2
+	rm libmatrix.o libmatrix.so phase1.o phase1 phase2.o phase2 ugly.o ugly

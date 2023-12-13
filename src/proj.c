@@ -1,11 +1,11 @@
 #include "matrix.h"
 #include <time.h>
 #include <string.h>
-#define RLIMIT 1
-#define FI 1000
-#define FJ 1000
-#define SI 100
-#define SJ 100
+#define RLIMIT 3
+#define FI 5
+#define FJ 5
+#define SI 2
+#define SJ 2
 
 
 matrix *some_opration(matrix *m1, matrix *m2);
