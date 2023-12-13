@@ -7,9 +7,13 @@
 #define SI 2
 #define SJ 2
 
+pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
-matrix *some_opration(matrix *m1, matrix *m2);
-void printer(matrix *, uint64_t i, uint64_t j, void*);
+void some_op(matrix *m1, matrix *m2);
+void psome_op(uint32_t nproc, matrix *m1, matrix *m2);
+matrix *some_ugly_op(matrix *m1, matrix *m2);
+void printer(matrix *, uint64_t i, uint64_t j, void *);
+  
 void matrand(matrix *, uint64_t i, uint64_t j, void *);
 
 int main(int argc, char **argv){
@@ -19,19 +23,28 @@ int main(int argc, char **argv){
   srand(10);
   m1 = create_matrix(FI, FJ, sizeof(int));
   m2 = create_matrix(SI, SJ, sizeof(int));
-  
+  puts("--------------------------------------------------");
   matrix_map(m1, NULL, matrand);
   matrix_map(m1, NULL, printer);
-  deb;
+  puts("--------------------------------------------------");
   matrix_map(m2, NULL, matrand);
   matrix_map(m2, NULL, printer);
-  deb;
+  puts("--------------------------------------------------");  
 #ifdef UGLY
+  puts("ugly");
   m3 = some_ugly_op(m1, m2);
-#else 
-  some_opration(m1, m2);
+  matrix_map(m3, NULL, printer);  
 #endif
-  matrix_map(m1, NULL, printer);
+#ifdef NPROC
+  puts("nproc");
+  psome_op(NPROC, m1, m2);
+  matrix_map(m1, NULL, printer);  
+#endif
+#ifdef P1
+  puts("linear");
+  some_op(m1, m2);
+  matrix_map(m1, NULL, printer);  
+#endif
   return 0;
 }
 
@@ -46,7 +59,7 @@ void matrand(matrix *mat, uint64_t i, uint64_t j, void *args) {
 }
 
 void inerator(matrix* m2, uint64_t i2, uint64_t j2, void * status){
-   uint64_t i1, j1, *res; 
+  uint64_t i1, j1, *res; 
   matrix* m1;
   m1 = (matrix *)((void **)status)[0];
   i1 = *(uint64_t *)(((void **)status)[1]);
@@ -67,11 +80,32 @@ void rator(matrix* m1, uint64_t i1, uint64_t j1,void* m2){
   matrix_map(m2, status, inerator);
   *(int*)(matref(m1, i1, j1)) = res;
 }
-matrix *some_opration(matrix *m1, matrix *m2){
-#ifdef NPROC
-  para_matrix_map(NPROC,m1, m2, rator);
-#else
+void some_op(matrix *m1, matrix *m2){
   matrix_map(m1, m2, rator);
-#endif
-  return NULL;
+}
+void psome_op(uint32_t nproc, matrix *m1, matrix *m2){
+  para_matrix_map(nproc,m1, m2, rator);
+}
+
+void ugly_rator(matrix* m1, uint64_t i1, uint64_t j1, void* st){
+  matrix *m2, *m3;
+  m2 = ((void **)st)[0];
+  m3 = ((void **)st)[1];
+  void *args[4];
+  uint64_t res = 0;
+  args[0] = m1;
+  args[1] = &i1;
+  args[2] = &j1;
+  args[3] = &res;
+  matrix_map(m2, args, rator);
+  *(int*)(matref(m1, i1, j1)) = res;
+}
+
+matrix *some_ugly_op(matrix* m1, matrix* m2){
+  matrix* m3 = matrix_copy(m1);
+  void*st[2];
+  st[0] = m2;
+  st[1] = m3;
+  para_matrix_map(MATSIZE(m1), m1, st, ugly_rator);
+  return m3;
 }
