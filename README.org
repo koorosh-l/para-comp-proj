@@ -29,18 +29,115 @@ libmatrix.so is written in a way that functions and structures don't assume anyt
 
 *** functions
 **** create_matrix
+
+Returns: Matrix Pointer
+Arguments: row_c, column_c, memb
+
+Initializes a pointer of type "matrix" and allocates memory for it. It sets the matrix pointer fields equal to the arguments passed to the function and returns a pointer to the newly created matrix.
+
 **** free_matrix
+
+Returns: No return value
+Arguments: Matrix Pointer
+
+Free's the memory allocated to matrix pointer.
+
 **** matrix_copy
+
+Returns: Matrix Pointer
+Arguments: Matrix Pointer
+
+Returns a newly created matrix with the same exact field values as the matrix passed to the function.
+
 **** matref
 **** matrix_map
 **** para_matrix_map
 
 *** macros
 **** MATSIZE
+
+Arguments: row_c, column_c
+
+It expands to an expression used to calculate the number of elements
+in the matrix.
+
 **** MATBYTES
+
+Arguments: row_c, column_c, memb
+
+It expands to an expression used to calculate the size of the matrix
+in bytes
+
 **** deb
 *** structs
 **** matrix
+
+Fields: row_c, column_c, memb, mat;
+
+Defines a struct that stores the pointer to a matrix, its row and column sizes,
+and the size of the matrix members in bytes. 
+
+
 **** interval
+
+** makefile
+
+*** Variables
+COMP_FLAGS := -g -lpthread -march=native
+NPROC :=$(shell nproc)
+
+*** all
+**** Dependencies: phase2, phase1, ugly
+
+Compiles the following phase targets: phase2, phase1, ugly
+
+*** ugly
+**** Dependencies: ugly.o
+
+Invokes gcc and links the ugly.o object file into an executable.  
+
+*** ugly.o
+**** Dependencies: src/proj.c, libmatrix.so
+
+Invokes gcc and compiles the source file, without linking, into an object file.
+Defines UGLY to run ugly.
+
+*** phase2
+**** Dependencies: phase2.o
+
+Invokes gcc and links the phase2.o file into an executable.
+
+*** phase2.o
+**** Dependencies: src/proj.c, libmatrix.so
+
+Invokes gcc and compiles the source file, without linking, into an object file.
+Defines NPROC to run Phase 2 of the project.
+
+*** phase1
+**** Dependencies: phase1.o
+
+Invokes gcc and links the phase1.o object file into an executable.
+
+*** phase1.o
+**** Dependencies: src/proj.c, libmatrix.so
+
+Invokes gcc and compiles the source file, without linking, into an object file.
+Defines P1 to run Phase 1 of the project.
+
+*** libmatrix.so
+**** Dependencies: libmatrix.o
+
+Invokes gcc and uses the -shared compiler flag to produce a shared object which can then be linked with other objects to form an executable called "libmatrix.so".
+
+*** libmatrix.o
+**** Dependencies: src/matrix.c, src/matrix.h
+
+Invokes gcc and compiles matrix.c, without linking, into an object file called "libmatrix.o". Calls -Wall and -fPIC compiler flags, to show all warnings, and makes sure the executable is independent of the position of libraries  in memory, respectively.
+
+*** clean
+**** Dependencies: 
+
+Invokes rm and removes all files produced by the makefile. 
+
 ** proj.c
 
