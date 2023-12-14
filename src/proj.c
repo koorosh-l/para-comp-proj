@@ -3,8 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #define RLIMIT 3
-#define FI 10
-#define FJ 10
+#define FI 2
+#define FJ 2
 #define SI 2
 #define SJ 2
 #define cnt printf("%d",++counter);
@@ -48,9 +48,7 @@ int main(int argc, char **argv){
   some_op(m1, m2);
   matrix_map(m1, NULL, printer);
 #endif
-  //fprintf(stderr, "%p %p\n", m1, ((matrix *)m1)->mat);
   free(m1);
-  //fprintf(stderr, "%p %p\n", m2, ((matrix *)m2)->mat);  
   free(m2);
 #ifdef UGLY
   free(m3);
@@ -89,7 +87,8 @@ void rator(matrix* m1, uint64_t i1, uint64_t j1,void* m2){
   status[1] = &i1;
   status[2] = &j1;
   status[3] = &res;
-  if(((matrix* )m2)->mat == 0) fprintf(stderr, "%d %d %p %p\n",(int)i1 , (int)j1, m2, ((matrix *)m2)->mat);  
+  if(((matrix* )m2)->mat == 0) fprintf(stderr, "%"PRIu64" %"PRIu64" %p %p\n",
+				       i1 , j1, m2, ((matrix *)m2)->mat);  
   matrix_map((matrix*)m2, status, inerator);
   *(int*)(matref(m1, i1, j1)) = res;
 }
