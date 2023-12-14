@@ -24,5 +24,4 @@ void matrix_map(matrix *m, void *args,
                 void (*func)(matrix *status, uint64_t i, uint64_t j, void * args));
 void para_matrix_map(uint32_t nproc , matrix * m, void * args,
 		     void (*func)(matrix *m, uint64_t i, uint64_t j, void * args));
-
-
+void free_matrix(matrix*);

@@ -9,6 +9,7 @@
 #define SJ 2
 #define cnt printf("%d",++counter);
 int counter = 0;
+
 pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void some_op(matrix *m1, matrix *m2);
@@ -40,12 +41,19 @@ int main(int argc, char **argv){
 #ifdef NPROC
   puts("nproc");
   psome_op(NPROC, m1, m2);
-  matrix_map(m1, NULL, printer);  
+  matrix_map(m1, NULL, printer);
 #endif
 #ifdef P1
   puts("linear");
   some_op(m1, m2);
-  matrix_map(m1, NULL, printer);  
+  matrix_map(m1, NULL, printer);
+#endif
+  //fprintf(stderr, "%p %p\n", m1, ((matrix *)m1)->mat);
+  free(m1);
+  //fprintf(stderr, "%p %p\n", m2, ((matrix *)m2)->mat);  
+  free(m2);
+#ifdef UGLY
+  free(m3);
 #endif
   return 0;
 }
@@ -72,16 +80,17 @@ void inerator(matrix* m2, uint64_t i2, uint64_t j2, void * status){
   /* printf("%" PRIu64" %" PRIu64"\n", i1, j1);   */
   if(i1 + i2 >= m1->row_c || j1 + j2 >= m1->column_c) return;
   *res = *res +
-         (*(int *)matref(m1, i1 + i2, j1 + j2)) * (*(int *)matref(m2, i2, j2));
+    (*(int *)matref(m1, i1 + i2, j1 + j2)) * (*(int *)matref(m2, i2, j2));
 }
 void rator(matrix* m1, uint64_t i1, uint64_t j1,void* m2){
   uint64_t res = 0;
   void *status[4];
-  status [0] = m1;
-  status [1] = &i1;
-  status [2] = &j1;
-  status [3] = &res;
-  matrix_map(m2, status, inerator);
+  status[0] = m1;
+  status[1] = &i1;
+  status[2] = &j1;
+  status[3] = &res;
+  if(((matrix* )m2)->mat == 0) fprintf(stderr, "%d %d %p %p\n",(int)i1 , (int)j1, m2, ((matrix *)m2)->mat);  
+  matrix_map((matrix*)m2, status, inerator);
   *(int*)(matref(m1, i1, j1)) = res;
 }
 void some_op(matrix *m1, matrix *m2){

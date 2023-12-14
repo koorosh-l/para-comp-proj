@@ -8,16 +8,35 @@ M_{3}[i][j] = \sum_{x = 0}^{M_2.j} \sum_{y}^{M_2.i} M_2[x][y] \times M_1[i+x][j+
 compile with
 #+begin_src shell
   make
+  ./ugly
+  ./phase1
+  ./phase2
 #+end_src
-This outputs two files phase1 and phase2.
-1. ./phase(1|2)
-2. ./phase(1|2) iM1 jM1
-3. ./phase(1|2) iM1 jM1 iM2 jM2 upperlimit
-4. 
-* Further development
-*Needs further testing might be some tiny problems with different sizes of matrices*.
-1. Unfolding all nested loops into one single loop(see matrix_map in libmatrix.c).
-   1.1 matrix_map can be written with an extra knill argument which is used to accumulate the return values func.
-2. some_opration() can be rewritten using just the matrix_map function w/o extra loops.
-3. finding a way to cleverly remove the need for checking boundaries in matorator() this might help achieving better cache hits and faster loops, the solution that comes to mind right now is, implementing the same functionality using % and reserving one or two fields in matrix->mat for storing the knill value. 
+phase1 is the algorithm written linearly.
+
+
+phase2 is a nice parallel form of the algorithm which distributes the jobs evenly across the number of threads returned by nproc.
+
+ugly is the parallel version as specified in the phase2 doc.
+
+unfortunately I don't think there is a good way of rewriting so that we are not always blocking one might create another thread that prints m3 repeatedly (and clears) the screen but the operation is finishes really fast and so the changes are not predictably visible in the outputs and solving this issue requires so much locking that our program is going to be sequential, also if the dimensions of m1 are too big then program always segfaults since para_matrix_map defines and array of threads on the stack, this can be fixed but realistically how plausible is it that we might want to create one thread for each cell of m1.
+
+* internals
+There are three source files in src proj.c is the actual code for the project and targets ugly, phase2 and phase1 are compiled from this file, matrix.c and matrix.h define a tiny matrix library, matrix.c compiles to libmatrix.so and output binaries are dynamically linked against this library(using -rpath so we don't have to modify LD_LIBRARY_PATH).
+
+** libmatrix.so
+libmatrix.so is written in a way that functions and structures don't assume anything about the size of the fields of our matrix so we can easily store any data type in there even other matrices.
+
+*** functions
+**** create_matrix
+**** free_matrix
+**** matrix_copy
+**** matref
+**** matrix_map
+**** para_matrix_map
+
+*** macros
+*** structs
+
+** proj.c
 

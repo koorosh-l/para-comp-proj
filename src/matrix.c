@@ -12,17 +12,24 @@ typedef struct interval interval;
 matrix* create_matrix(uint64_t row_c, uint64_t column_c, size_t memb){
   matrix* m;
   m = malloc(sizeof(matrix));
+  if(!m) {
+    fprintf(stderr,"first malloc failed %p", m);
+    exit(-1);
+  }
   m->row_c    = row_c;
   m->column_c = column_c;
   m->memb     = memb;
   m->mat      = malloc(MATBYTES(m));
+  if(!m->mat){
+    
+  }
   return m;
 }
 void* matref(matrix* m, int i, int j){
   return m->mat + (i * m->column_c * m->memb) + (j * m->memb);
 }
 void matrix_map(matrix *m, void *args,
-               void (*func)(matrix *, uint64_t, uint64_t, void *))
+		void (*func)(matrix *, uint64_t, uint64_t, void *))
 {
   for(uint64_t i = 0; i < m->row_c * m->column_c; i++){
     func(m, i / (m->column_c), i % (m->column_c), args);
@@ -33,17 +40,17 @@ static inline void* partial_map(interval* args){
   for(uint64_t i = ((interval*)args)->start; i < ((interval*)args)->end; i++){
     args->func(args->m, i/args->m->column_c, i%args->m->column_c, args->pass);
   }
-  
   pthread_exit(NULL);
   return NULL;
 }
 
 void para_matrix_map(uint32_t nproc, matrix *m, void *arg,
-                      void (*func)(matrix *, uint64_t, uint64_t, void *))
+		     void (*func)(matrix *, uint64_t, uint64_t, void *))
 {
+  if(nproc < MATSIZE(m)) matrix_map(m, arg, func);
   uint64_t step = MATSIZE(m)/nproc;
   pthread_t threads[nproc];
-  interval  inter[nproc];
+  interval inter[nproc];
   for(uint8_t i = 0; i < nproc - 1; i++){
     inter[i].m     = m;
     inter[i].start = i * step;
@@ -69,4 +76,10 @@ matrix* matrix_copy(matrix * m){
   matrix* res = create_matrix(m->row_c, m->column_c, m->memb);
   memcpy(res->mat, m->mat, MATBYTES(m));
   return res;
+}
+
+void free_matrix(matrix* m){
+  free(m->mat);
+  free(m);
+  return;
 }
