@@ -36,7 +36,11 @@ libmatrix.so is written in a way that functions and structures don't assume anyt
 **** para_matrix_map
 
 *** macros
+**** MATSIZE
+**** MATBYTES
+**** deb
 *** structs
-
+**** matrix
+**** interval
 ** proj.c
 

@@ -1,4 +1,4 @@
-COMP_FLAGS := -O2 -lpthread -march=native
+COMP_FLAGS := -g -lpthread -march=native
 NPROC      := $(shell nproc)
 
 all: phase2 phase1 ugly
