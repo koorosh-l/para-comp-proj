@@ -41,10 +41,9 @@ void *partial_map(interval *args) {
   if (args->start == args->end) {
     args->func(args->m, i / args->m->column_c, i % args->m->column_c,
                args->pass);
-    return NULL;
   }
   
-  for(; i < ((interval*)args)->end; i++){
+  for(; i <= ((interval*)args)->end; i++){
     args->func(args->m, i/args->m->column_c, i%args->m->column_c, args->pass);
   }
   pthread_exit(NULL);
@@ -65,18 +64,18 @@ void para_matrix_map(uint32_t nproc, matrix *m, void *arg,
     inter[i].end   = (inter[i].start+step)-1;
     inter[i].pass  = arg;
     inter[i].func  = func;
-    fprintf(stderr, "partial_map %" PRIu64 " %" PRIu64 "\n", inter[i].start,
-            inter[i].end);
+    /* fprintf(stderr, "partial_map %" PRIu64 " %" PRIu64 "\n", inter[i].start, */
+    /*         inter[i].end); */
     pthread_create(&threads[i], NULL, ((void *(*)(void *))partial_map),
                    &inter[i]);
   }
   inter[nproc - 1].m     = m;
   inter[nproc - 1].start = (nproc - 1) * step;
-  inter[nproc - 1].end   = MATSIZE(m)-1;
+  inter[nproc - 1].end   = MATSIZE(m) - 1;
   inter[nproc - 1].pass  = arg;
   inter[nproc - 1].func = func;
-  fprintf(stderr, "partial_map %" PRIu64 " %" PRIu64 "\n",
-          inter[nproc - 1].start, inter[nproc - 1].end);
+  /* fprintf(stderr, "partial_map %" PRIu64 " %" PRIu64 "\n", */
+  /*         inter[nproc - 1].start, inter[nproc - 1].end); */
   pthread_create(&threads[nproc - 1], NULL, ((void *(*)(void *))partial_map),
                  &inter[nproc - 1]);
     
