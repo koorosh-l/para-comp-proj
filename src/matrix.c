@@ -36,8 +36,15 @@ void matrix_map(matrix *m, void *args,
   }
 }
 
-void* partial_map(interval* args){
-  for(uint64_t i = ((interval*)args)->start; i < ((interval*)args)->end; i++){
+void *partial_map(interval *args) {
+  uint64_t i = ((interval *)args)->start;
+  if (args->start == args->end) {
+    args->func(args->m, i / args->m->column_c, i % args->m->column_c,
+               args->pass);
+    return NULL;
+  }
+  
+  for(; i < ((interval*)args)->end; i++){
     args->func(args->m, i/args->m->column_c, i%args->m->column_c, args->pass);
   }
   pthread_exit(NULL);
