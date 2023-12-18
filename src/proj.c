@@ -14,7 +14,7 @@ pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void some_op(matrix *m1, matrix *m2);
 matrix *psome_op(uint32_t nproc, matrix *m1, matrix *m2);
-matrix *some_ugly_op(matrix *m1, matrix *m2);
+matrix *some_p2_op(matrix *m1, matrix *m2);
 void printer(matrix *, uint64_t i, uint64_t j, void *);
   
 void matrand(matrix *, uint64_t i, uint64_t j, void *);
@@ -33,9 +33,9 @@ int main(int argc, char **argv){
   matrix_map(m2, NULL, matrand);
   matrix_map(m2, NULL, printer);
   puts("");
-#ifdef UGLY
-  puts("ugly");
-  m3 = some_ugly_op(m1, m2);
+#ifdef P2
+  puts("p2");
+  m3 = some_p2_op(m1, m2);
   matrix_map(m3, NULL, printer);  
 #endif
 #ifdef NPROC
@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 #endif
   free(m1);
   free(m2);
-#ifdef UGLY
+#ifdef P2
   free(m3);
 #endif
   return 0;
@@ -107,7 +107,7 @@ matrix *psome_op(uint32_t nproc, matrix *m1, matrix *m2) {
   return m3;
 }
 
-void ugly_rator(matrix *m1, uint64_t i1, uint64_t j1, void *st) {
+void p2_rator(matrix *m1, uint64_t i1, uint64_t j1, void *st) {
   matrix *m2, *m3;
   m2 = ((void **)st)[0];
   m3 = ((void **)st)[1];  
@@ -127,12 +127,12 @@ void ugly_rator(matrix *m1, uint64_t i1, uint64_t j1, void *st) {
 void minus1 (matrix* m, uint64_t i, uint64_t j, void* arg){
   *(int *)matref(m, i, j) = -1;
 }
-matrix *some_ugly_op(matrix* m1, matrix* m2){
+matrix *some_p2_op(matrix* m1, matrix* m2){
   matrix *m3 = matrix_copy(m1);
   matrix_map(m3, NULL, minus1);
   void *st[2];
   st[0] = m2;
   st[1] = m3;
-  para_matrix_map(MATSIZE(m1), m1, st, ugly_rator);
+  para_matrix_map(MATSIZE(m1), m1, st, p2_rator);
   return m3;
 }

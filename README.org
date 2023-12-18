@@ -8,20 +8,20 @@ M_{3}[i][j] = \sum_{x = 0}^{M_2.j} \sum_{y}^{M_2.i} M_2[x][y] \times M_1[i+x][j+
 compile with
 #+begin_src shell
   make
-  ./ugly
-  ./phase1
   ./phase2
+  ./phase1
+  ./better
 #+end_src
 phase1 is the algorithm written linearly.
 
-phase2 is a nice parallel form of the algorithm which distributes the jobs evenly across the number of threads returned by nproc.
+better is a nice parallel form of the algorithm which distributes the jobs evenly across the number of threads returned by nproc.
 
-ugly is the parallel version as specified in the phase2 doc.
+phase2 is the parallel version as specified in the phase2 doc.
 
 unfortunately I don't think there is a good way of rewriting so that we are not always blocking one might create another thread that prints m3 repeatedly (and clears) the screen but the operation is finishes really fast and so the changes are not predictably visible in the outputs and solving this issue requires so much locking that our program is going to be sequential, also if the dimensions of m1 are too big then program always segfaults since para_matrix_map defines and array of threads on the stack, this can be fixed but realistically how plausible is it that we might want to create one thread for each cell of m1.
 
 * internals
-There are three source files in src proj.c is the actual code for the project and targets ugly, phase2 and phase1 are compiled from this file, matrix.c and matrix.h define a tiny matrix library, matrix.c compiles to libmatrix.so and output binaries are dynamically linked against this library(using -rpath so we don't have to modify LD_LIBRARY_PATH).
+There are three source files in src proj.c is the actual code for the project and targets phase2, better and phase1 are compiled from this file, matrix.c and matrix.h define a tiny matrix library, matrix.c compiles to libmatrix.so and output binaries are dynamically linked against this library(using -rpath so we don't have to modify LD_LIBRARY_PATH).
 
 ** libmatrix.so
 libmatrix.so is written in a way that functions and structures don't assume anything about the size of the fields of our matrix so we can easily store any data type in there even other matrices.
@@ -105,23 +105,23 @@ COMP_FLAGS := -g -lpthread -march=native
 NPROC :=$(shell nproc)
 
 *** all
-**** Dependencies: phase2, phase1, ugly
-Compiles the following phase targets: phase2, phase1, ugly
-
-*** ugly
-**** Dependencies: ugly.o
-Invokes gcc and links the ugly.o object file into an executable.  
-
-*** ugly.o
-**** Dependencies: src/proj.c, libmatrix.so
-Invokes gcc and compiles the source file, without linking, into an object file.
-Defines UGLY to run ugly.
+**** Dependencies: better, phase1, phase2
+Compiles the following phase targets: better, phase1, phase2
 
 *** phase2
 **** Dependencies: phase2.o
-Invokes gcc and links the phase2.o file into an executable.
+Invokes gcc and links the phase2.o object file into an executable.  
 
 *** phase2.o
+**** Dependencies: src/proj.c, libmatrix.so
+Invokes gcc and compiles the source file, without linking, into an object file.
+Defines PHASE2 to run phase2.
+
+*** better
+**** Dependencies: better.o
+Invokes gcc and links the better.o file into an executable.
+
+*** better.o
 **** Dependencies: src/proj.c, libmatrix.so
 Invokes gcc and compiles the source file, without linking, into an object file.
 
@@ -186,7 +186,7 @@ Returns : matrix pointer
 Arguments: 32 bytes integer(number of threads), matrix pointer, matrix pointer
 Tow matrices in the form of an array,rator function and number of threads are passed to para_matrix_map in order to calculate all elements of the target matrix(m3) in a parallel way.
 
-**** ugly_rator
+**** phase2_rator
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), matrix pointer
 Follows the same goal as rator function, with the difference that after each thread finishes his task, it prints the changes in the target matrix (by using pthread_mutex).
@@ -196,10 +196,10 @@ Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), void pointer
 initializing all enteries of the target matrix.
 
-**** some_ugly_op
+**** some_phase2_op
 Returns: matrix pointer
 Arguments: matrix pointer, matrix pointer
-It is really as same as psome_op function, but instead of rator function, the ugly_rator function is passed to to para_matrix_map in order to show the changes in the target matrix after each thread finishes its task.
+It is really as same as psome_op function, but instead of rator function, the phase2_rator function is passed to to para_matrix_map in order to show the changes in the target matrix after each thread finishes its task.
 
 **** main
-In the main function, matrices m1 and m2 are created randomly, then according to the chosen compile version phase1 or phase2(psome_op without pthread_mutex or some_ugly_op with pthread_mutex) the program will be executed and the results are shown.
+In the main function, matrices m1 and m2 are created randomly, then according to the chosen compile version phase1 or phase2(psome_op without pthread_mutex or some_phase2_op with pthread_mutex) the program will be executed and the results are shown.

@@ -1,15 +1,6 @@
-<<<<<<< HEAD
-./phase1
-./phase2
 *.o
 *.so
 *.path
-=======
-libmatrix.o
-libmatrix.so
-phase1.o
-phase1 
-*.o
+/phase1 
 /phase2
->>>>>>> dev
-/ugly
+/better
