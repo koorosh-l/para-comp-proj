@@ -36,8 +36,14 @@ void matrix_map(matrix *m, void *args,
   }
 }
 
-static inline void* partial_map(interval* args){
-  for(uint64_t i = ((interval*)args)->start; i < ((interval*)args)->end; i++){
+void *partial_map(interval *args) {
+  uint64_t i = ((interval *)args)->start;
+  if (args->start == args->end) {
+    args->func(args->m, i / args->m->column_c, i % args->m->column_c,
+               args->pass);
+  }
+  
+  for(; i <= ((interval*)args)->end; i++){
     args->func(args->m, i/args->m->column_c, i%args->m->column_c, args->pass);
   }
   pthread_exit(NULL);
@@ -47,23 +53,29 @@ static inline void* partial_map(interval* args){
 void para_matrix_map(uint32_t nproc, matrix *m, void *arg,
 		     void (*func)(matrix *, uint64_t, uint64_t, void *))
 {
-  if(nproc < MATSIZE(m)) matrix_map(m, arg, func);
-  uint64_t step = MATSIZE(m)/nproc;
+  if(nproc > MATSIZE(m)) nproc = MATSIZE(m);
+  printf("nproc: %"PRIu32"\n", nproc);
+  uint64_t step = (MATSIZE(m))/nproc;
   pthread_t threads[nproc];
   interval inter[nproc];
-  for(uint8_t i = 0; i < nproc - 1; i++){
+  for (uint32_t i = 0; i < nproc - 1; i++) {
     inter[i].m     = m;
     inter[i].start = i * step;
-    inter[i].end   = (inter[i].start+step);
+    inter[i].end   = (inter[i].start+step)-1;
     inter[i].pass  = arg;
     inter[i].func  = func;
-    pthread_create(&threads[i], NULL, ((void* (*)(void*))partial_map), &inter[i]);
+    /* fprintf(stderr, "partial_map %" PRIu64 " %" PRIu64 "\n", inter[i].start, */
+    /*         inter[i].end); */
+    pthread_create(&threads[i], NULL, ((void *(*)(void *))partial_map),
+                   &inter[i]);
   }
   inter[nproc - 1].m     = m;
   inter[nproc - 1].start = (nproc - 1) * step;
-  inter[nproc - 1].end   = (inter[nproc - 1].start+step) + ((nproc - 1) % nproc);
+  inter[nproc - 1].end   = MATSIZE(m) - 1;
   inter[nproc - 1].pass  = arg;
-  inter[nproc - 1].func  = func;
+  inter[nproc - 1].func = func;
+  /* fprintf(stderr, "partial_map %" PRIu64 " %" PRIu64 "\n", */
+  /*         inter[nproc - 1].start, inter[nproc - 1].end); */
   pthread_create(&threads[nproc - 1], NULL, ((void *(*)(void *))partial_map),
                  &inter[nproc - 1]);
     
