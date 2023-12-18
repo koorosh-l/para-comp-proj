@@ -14,7 +14,6 @@ compile with
 #+end_src
 phase1 is the algorithm written linearly.
 
-
 phase2 is a nice parallel form of the algorithm which distributes the jobs evenly across the number of threads returned by nproc.
 
 ugly is the parallel version as specified in the phase2 doc.
@@ -29,15 +28,15 @@ libmatrix.so is written in a way that functions and structures don't assume anyt
 
 *** functions
 **** create_matrix
-
 Returns: Matrix Pointer
+
 Arguments: row_c, column_c, memb
 
 Initializes a pointer of type "matrix" and allocates memory for it. It sets the matrix pointer fields equal to the arguments passed to the function and returns a pointer to the newly created matrix.
 
 **** free_matrix
-
 Returns: No return value
+
 Arguments: Matrix Pointer
 
 Free's the memory allocated to matrix pointer.
@@ -45,103 +44,91 @@ Free's the memory allocated to matrix pointer.
 **** matrix_copy
 
 Returns: Matrix Pointer
+
 Arguments: Matrix Pointer
 
 Returns a newly created matrix with the same exact field values as the matrix passed to the function.
 
 **** matref
-
 Returns: void pointer
+
 Arguments: matrix pointer, index i , index j
+
 calculate the address of the indeces i and j for matrix m.
 
 **** matrix_map
-
 Returns: void
+
 Arguments: matrix pointer, void pointer, function pointer
+
 Apply the function (which is passed as an argument) on all elements of the input matrix. The void pointer is the argument which the function will use.
 
 **** para_matrix_map
-
 Returns: void
+
 Arguments: 32 bytes integer, matrix pointer, void pointer, function pointer
+
 Acts like the matrix_map but in the parallel way with the needed threads.
 
 **** partial_map
-
 Returns: void pointer for passing to pthread_creat(it is NULL in this case)
+
 Argument: struct interval pointer(boundry of a thread execution)
+
 Like matrix_map but for a special part of a Matrix(each thread use this function to do its task).
 
 *** macros
 **** MATSIZE
-
 Arguments: row_c, column_c
 
-It expands to an expression used to calculate the number of elements
-in the matrix.
+It expands to an expression used to calculate the number of elements in the matrix.
 
 **** MATBYTES
-
 Arguments: row_c, column_c, memb
 
-It expands to an expression used to calculate the size of the matrix
-in bytes
+It expands to an expression used to calculate the size of the matrix in bytes.
 
 **** deb
-
-It is used for debugging the code during the writing it
-The file name and the line is printed.
+It is used for debugging the code during the writing it The file name and the line is printed.
 
 *** structs
-
-
 **** matrix
-
 Fields: row_c, column_c, memb, mat;
 
-Defines a struct that stores the pointer to a matrix, its row and column sizes,
-and the size of the matrix members in bytes. 
-
+Defines a struct that stores the pointer to a matrix, its row and column sizes, and the size of the matrix members in bytes. 
 
 **** interval
 Members: Matrix pointer, start and end(boundrieas for executing a thread), void pointer(the argument like matrix_map void pointer), func(the function that will be passed to partial_map).
 ** makefile
-
 *** Variables
 COMP_FLAGS := -g -lpthread -march=native
 NPROC :=$(shell nproc)
 
 *** all
 **** Dependencies: phase2, phase1, ugly
-
 Compiles the following phase targets: phase2, phase1, ugly
 
 *** ugly
 **** Dependencies: ugly.o
-
 Invokes gcc and links the ugly.o object file into an executable.  
 
 *** ugly.o
 **** Dependencies: src/proj.c, libmatrix.so
-
 Invokes gcc and compiles the source file, without linking, into an object file.
 Defines UGLY to run ugly.
 
 *** phase2
 **** Dependencies: phase2.o
-
 Invokes gcc and links the phase2.o file into an executable.
 
 *** phase2.o
 **** Dependencies: src/proj.c, libmatrix.so
-
 Invokes gcc and compiles the source file, without linking, into an object file.
+
 Defines NPROC to run Phase 2 of the project.
 
 *** phase1
 **** Dependencies: phase1.o
-
 Invokes gcc and links the phase1.o object file into an executable.
 
 *** phase1.o
@@ -152,82 +139,67 @@ Defines P1 to run Phase 1 of the project.
 
 *** libmatrix.so
 **** Dependencies: libmatrix.o
-
 Invokes gcc and uses the -shared compiler flag to produce a shared object which can then be linked with other objects to form an executable called "libmatrix.so".
 
 *** libmatrix.o
 **** Dependencies: src/matrix.c, src/matrix.h
-
 Invokes gcc and compiles matrix.c, without linking, into an object file called "libmatrix.o". Calls -Wall and -fPIC compiler flags, to show all warnings, and makes sure the executable is independent of the position of libraries  in memory, respectively.
 
 *** clean
 **** Dependencies: 
-
 Invokes rm and removes all files produced by the makefile. 
 
 ** proj.c
-
 matrix.h as a library is used.
 The dimensions of the m1 and m2 matrices are defined as a constant as well as the range of generating random numbers for matrices enteries.
 
-***functions
-
+*** functions
 **** printer
-
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), void pointer
 With considering the boundries of index i and j and using matref function, prints the element which is located in that i&j indecies
 Combination of matrix_map and printer results in printing a matrix.
 
 **** matrand
-
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), void pointer
 With the help of matref, a random number is assigned to the ith and jth entry of the matrix
 Combination of matrix_map and matrand results in assigning all enteries of a matrix.
 
 **** inerator
-
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), void pointer(status: act as an array of matrrix, i and j indeces, an integer for calculating sum of corresponding part of two matrics)
 This function add the multiplication of corresponding enteries of matrix m1 and m2 to the last multiplication operation.
 
 **** rator
-
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), matrix pointer
 It calculates each element of the target matrix with the contribution of matrix_map and inerator.
 
 **** some_op
-
 Returns: void
 Arguments: matrix pointer, matrix pointer
 Tow matrices in the form of an array and rator function are passed to matrix_map in order to calculate all elements of the target matrix.
 
 **** psome_op
-                                                 
 Returns : matrix pointer
 Arguments: 32 bytes integer(number of threads), matrix pointer, matrix pointer
 Tow matrices in the form of an array,rator function and number of threads are passed to para_matrix_map in order to calculate all elements of the target matrix(m3) in a parallel way.
 
 **** ugly_rator
-
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), matrix pointer
 Follows the same goal as rator function, with the difference that after each thread finishes his task, it prints the changes in the target matrix (by using pthread_mutex).
 
 **** minus1
-
 Returns: void
 Arguments: matrix pointer, 64 bytes integer(index i), 64 bytes integer(index j), void pointer
 initializing all enteries of the target matrix.
 
 **** some_ugly_op
-
 Returns: matrix pointer
 Arguments: matrix pointer, matrix pointer
 It is really as same as psome_op function, but instead of rator function, the ugly_rator function is passed to to para_matrix_map in order to show the changes in the target matrix after each thread finishes its task.
 
 **** main
-
 In the main function, matrices m1 and m2 are created randomly, then according to the chosen compile version phase1 or phase2(psome_op without pthread_mutex or some_ugly_op with pthread_mutex) the program will be executed and the results are shown.
