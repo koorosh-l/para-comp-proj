@@ -203,3 +203,5 @@ It is really as same as psome_op function, but instead of rator function, the ph
 
 **** main
 In the main function, matrices m1 and m2 are created randomly, then according to the chosen compile version phase1 or phase2(psome_op without pthread_mutex or some_phase2_op with pthread_mutex) the program will be executed and the results are shown.
+
+**Done
