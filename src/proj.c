@@ -3,8 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #define RLIMIT 2
-#define FI 20
-#define FJ 12
+#define FI 15
+#define FJ 10
 #define SI FI
 #define SJ FJ
 #define cnt printf("%d",++counter);
